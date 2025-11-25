@@ -1,0 +1,54 @@
+{
+  "name": "@salvageunionio/robo",
+  "description": "A Discord Bot and Activity for Rolling Dice",
+  "version": "0.22.0",
+  "type": "module",
+  "private": true,
+  "keywords": [
+    "activity",
+    "api",
+    "discord",
+    "embed",
+    "embedded app",
+    "http",
+    "robo",
+    "robo.js",
+    "sdk",
+    "server",
+    "typescript",
+    "vite",
+    "web"
+  ],
+  "scripts": {
+    "lint": "bun run lint:eslint && bun run lint:style",
+    "lint:eslint": "bunx eslint -c config/eslint.ts .",
+    "lint:style": "bunx prettier --write .",
+    "build": "robox build",
+    "deploy": "robox deploy",
+    "dev": "robox dev",
+    "doctor": "sage doctor",
+    "invite": "robox invite",
+    "start": "robox start",
+    "upgrade": "sage upgrade"
+  },
+  "dependencies": {
+    "@discord/embedded-app-sdk": "^2.4.0",
+    "@randsum/roller": "^0.27.0",
+    "@randsum/salvageunion": "^0.32.0",
+    "@robojs/patch": "^0.2.1",
+    "discord.js": "^14.23.2",
+    "extensionless": "^2.0.2",
+    "robo.js": "^0.10.31"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.38.0",
+    "@swc/core": "^1.13.5",
+    "@types/node": "^24.8.1",
+    "eslint": "^9.38.0",
+    "globals": "^16.4.0",
+    "jiti": "^2.6.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.1"
+  }
+}
