@@ -4,9 +4,6 @@ export default <Config>{
   clientOptions: {
     intents: ["Guilds", "GuildMessages"],
   },
-  logger: {
-    level: "debug",
-  },
   plugins: [],
   type: "robo",
 };

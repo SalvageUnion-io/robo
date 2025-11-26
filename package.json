@@ -24,7 +24,7 @@
     "lint:eslint": "bunx eslint -c config/eslint.ts .",
     "lint:style": "bunx prettier --write .",
     "build": "robox build",
-    "deploy": "railway up",
+    "deploy": "bun run build &&railway up",
     "dev": "robox dev",
     "doctor": "sage doctor",
     "invite": "robox invite",
