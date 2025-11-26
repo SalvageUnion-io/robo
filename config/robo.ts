@@ -1,9 +1,12 @@
-import type { Config } from 'robo.js'
+import type { Config } from "robo.js";
 
 export default <Config>{
-	clientOptions: {
-		intents: ['Guilds', 'GuildMessages']
-	},
-	plugins: [],
-	type: 'robo'
-}
+  clientOptions: {
+    intents: ["Guilds", "GuildMessages"],
+  },
+  logger: {
+    level: "debug",
+  },
+  plugins: [],
+  type: "robo",
+};
