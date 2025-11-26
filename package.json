@@ -24,7 +24,7 @@
     "lint:eslint": "bunx eslint -c config/eslint.ts .",
     "lint:style": "bunx prettier --write .",
     "build": "robox build",
-    "deploy": "robox deploy",
+    "deploy": "railway up",
     "dev": "robox dev",
     "doctor": "sage doctor",
     "invite": "robox invite",
@@ -35,6 +35,7 @@
     "@randsum/roller": "^0.27.0",
     "@randsum/salvageunion": "^0.42.0",
     "@robojs/patch": "^0.2.1",
+    "@supabase/supabase-js": "^2.39.0",
     "discord.js": "^14.25.1",
     "extensionless": "^2.0.2",
     "robo.js": "^0.10.31"
