@@ -57,4 +57,3 @@ export default async (req: any, res: any) => {
     res.status(500).send("Internal server error");
   }
 };
-
