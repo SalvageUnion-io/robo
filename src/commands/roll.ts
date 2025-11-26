@@ -1,86 +1,107 @@
-import type { APIEmbed, ChatInputCommandInteraction } from 'discord.js'
-import { Colors, EmbedBuilder } from 'discord.js'
-import type { CommandConfig, CommandOptions, CommandResult } from 'robo.js'
-import type { SalvageUnionTableName } from '@randsum/salvageunion'
-import { rollTable, SALVAGE_UNION_TABLE_NAMES } from '@randsum/salvageunion'
-import { embedFooterDetails } from '../core/constants'
-
-const suChoices = SALVAGE_UNION_TABLE_NAMES.map((table) => ({
-	name: table,
-	value: table
-}))
+import type {
+  APIEmbed,
+  ChatInputCommandInteraction,
+  AutocompleteInteraction,
+} from "discord.js";
+import { Colors, EmbedBuilder } from "discord.js";
+import type { CommandConfig, CommandOptions, CommandResult } from "robo.js";
+import type { SalvageUnionTableName } from "@randsum/salvageunion";
+import { rollTable, SALVAGE_UNION_TABLE_NAMES } from "@randsum/salvageunion";
+import { embedFooterDetails } from "../core/constants";
 
 export const config: CommandConfig = {
-	description: 'The Salvage Union is here to help you with your salvaging needs',
-	options: [
-		{
-			name: 'table',
-			description: 'What table are you rolling on?',
-			type: 'string',
-			choices: suChoices
-		}
-	]
+  description:
+    "The Salvage Union is here to help you with your salvaging needs",
+  options: [
+    {
+      name: "table",
+      description: "What table are you rolling on?",
+      type: "string",
+      autocomplete: true,
+    },
+  ],
+};
+
+export async function autocomplete(
+  interaction: AutocompleteInteraction
+): Promise<void> {
+  const focused = interaction.options.getFocused(true);
+
+  if (focused.name === "table") {
+    const query = focused.value.toLowerCase();
+    const matches = SALVAGE_UNION_TABLE_NAMES.filter((table) =>
+      table.toLowerCase().includes(query)
+    )
+      .slice(0, 25) // Discord limits autocomplete to 25 results
+      .map((table) => ({
+        name: table,
+        value: table,
+      }));
+
+    await interaction.respond(matches);
+  }
 }
 
 function getColor(type: number): number {
-	switch (type) {
-		case 20:
-			return Colors.Green
-		case 19:
-		case 18:
-		case 17:
-		case 16:
-		case 15:
-		case 14:
-		case 13:
-		case 12:
-		case 11:
-			return Colors.DarkGreen
-		case 10:
-		case 9:
-		case 8:
-		case 7:
-		case 6:
-			return Colors.Yellow
-		case 5:
-		case 4:
-		case 3:
-		case 2:
-			return Colors.Red
-		case 1:
-			return Colors.DarkRed
-		default:
-			return Colors.Greyple
-	}
+  switch (type) {
+    case 20:
+      return Colors.Green;
+    case 19:
+    case 18:
+    case 17:
+    case 16:
+    case 15:
+    case 14:
+    case 13:
+    case 12:
+    case 11:
+      return Colors.DarkGreen;
+    case 10:
+    case 9:
+    case 8:
+    case 7:
+    case 6:
+      return Colors.Yellow;
+    case 5:
+    case 4:
+    case 3:
+    case 2:
+      return Colors.Red;
+    case 1:
+      return Colors.DarkRed;
+    default:
+      return Colors.Greyple;
+  }
 }
 
 export function buildEmbed(table: SalvageUnionTableName): APIEmbed {
-	const {
-		result: { label, description, roll: total }
-	} = rollTable(table)
+  const {
+    result: { label, description, roll: total },
+  } = rollTable(table);
 
-	const embed = new EmbedBuilder()
-		.setTitle(`${total} - ${label}`)
-		.setColor(getColor(total))
-		.addFields([
-			{ name: 'Table', value: table, inline: true },
-			{ name: 'Roll', value: String(total), inline: true }
-		])
-		.setFooter(embedFooterDetails)
+  const embed = new EmbedBuilder()
+    .setTitle(`${total} - ${label}`)
+    .setColor(getColor(total))
+    .addFields([
+      { name: "Table", value: table, inline: true },
+      { name: "Roll", value: String(total), inline: true },
+    ])
+    .setFooter(embedFooterDetails);
 
-	if (description !== '') {
-		embed.setDescription(description)
-	}
+  if (description !== "") {
+    embed.setDescription(description);
+  }
 
-	return embed.toJSON()
+  return embed.toJSON();
 }
 
 export default async (
-	interaction: ChatInputCommandInteraction,
-	{ table }: CommandOptions<typeof config>
+  interaction: ChatInputCommandInteraction,
+  { table }: CommandOptions<typeof config>
 ): Promise<CommandResult> => {
-	const tableName: SalvageUnionTableName = (table ?? 'Core Mechanic') as SalvageUnionTableName
+  const tableName: SalvageUnionTableName = (table ??
+    "Core Mechanic") as SalvageUnionTableName;
 
-	await interaction.deferReply()
-	await interaction.editReply({ embeds: [buildEmbed(tableName)] })
-}
+  await interaction.deferReply();
+  await interaction.editReply({ embeds: [buildEmbed(tableName)] });
+};

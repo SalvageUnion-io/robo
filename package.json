@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@randsum/roller": "^0.27.0",
-    "@randsum/salvageunion": "^0.41.0",
+    "@randsum/salvageunion": "^0.42.0",
     "@robojs/patch": "^0.2.1",
     "discord.js": "^14.25.1",
     "extensionless": "^2.0.2",
