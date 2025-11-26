@@ -10,7 +10,7 @@ BEGIN
   SELECT i.user_id INTO found_user_id
   FROM auth.identities i
   WHERE i.provider = 'discord'
-    AND i.provider_user_id = discord_id
+    AND (i.identity_data->>'sub' = discord_id OR i.identity_data->>'id' = discord_id)
   LIMIT 1;
   
   RETURN found_user_id;

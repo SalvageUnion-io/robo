@@ -5,14 +5,24 @@ import { getUserByDiscordId, getUserPilots } from "../lib/supabase-helpers";
 import { embedFooterDetails } from "../core/constants";
 
 export const config: CommandConfig = {
-  description: "View your pilot IDs from salvageunion.io",
+  description: "View your pilots from salvageunion.io",
 };
 
 export default async (
   interaction: ChatInputCommandInteraction,
   _options: CommandOptions<typeof config>
 ): Promise<CommandResult> => {
-  await interaction.deferReply();
+  // Defer immediately to prevent interaction timeout
+  try {
+    await interaction.deferReply();
+  } catch (error: any) {
+    // If interaction already expired or was replied to, log and return
+    if (error.code === 10062 || error.code === 40060) {
+      console.error("Interaction expired before defer:", error);
+      return;
+    }
+    throw error;
+  }
 
   try {
     const discordUserId = interaction.user.id;
@@ -36,18 +46,28 @@ export default async (
       return;
     }
 
-    const pilotIds = pilots.map((p) => `\`${p.id}\``).join(", ");
+    // Create individual embeds for each pilot (Discord limit: 10 embeds per message)
+    const embeds = pilots.slice(0, 10).map((pilot) => {
+      const title = pilot.callsign || "Unnamed Pilot";
+      const url = `https://salvageunion.io/dashboard/pilots/${pilot.id}`;
+      
+      return new EmbedBuilder()
+        .setTitle(title)
+        .setURL(url)
+        .setColor(Colors.Green)
+        .setFooter(embedFooterDetails)
+        .setTimestamp();
+    });
 
-    const embed = new EmbedBuilder()
-      .setTitle("👤 Your Pilots")
-      .setDescription(
-        pilotIds.length > 4096 ? pilotIds.substring(0, 4093) + "..." : pilotIds
-      )
-      .setColor(Colors.Green)
-      .setFooter(embedFooterDetails)
-      .setTimestamp();
+    // If there are more than 10 pilots, add a note
+    if (pilots.length > 10) {
+      const lastEmbed = embeds[embeds.length - 1];
+      lastEmbed.setDescription(
+        `*Showing 10 of ${pilots.length} pilots. Visit your dashboard to see all.*`
+      );
+    }
 
-    await interaction.editReply({ embeds: [embed.toJSON()] });
+    await interaction.editReply({ embeds: embeds.map((e) => e.toJSON()) });
   } catch (error: any) {
     console.error("Error fetching pilots:", error);
     await interaction.editReply({

@@ -61,7 +61,7 @@ export async function getUserGames(userId: string) {
   // Get games where user is the creator
   const { data: createdGames, error: createdError } = await supabase
     .from("games")
-    .select("id")
+    .select("id, name")
     .eq("created_by", userId);
 
   if (createdError) {
@@ -71,7 +71,7 @@ export async function getUserGames(userId: string) {
   // Get games where user is a member
   const { data: memberGames, error: memberError } = await supabase
     .from("game_members")
-    .select("game_id")
+    .select("game_id, games(id, name)")
     .eq("user_id", userId);
 
   if (memberError) {
@@ -79,12 +79,22 @@ export async function getUserGames(userId: string) {
   }
 
   // Combine and deduplicate
-  const allGameIds = new Set<string>();
+  const gameMap = new Map<string, { id: string; name: string }>();
 
-  (createdGames || []).forEach((g) => allGameIds.add(g.id));
-  (memberGames || []).forEach((m) => allGameIds.add(m.game_id));
+  (createdGames || []).forEach((g) => {
+    if (g.id) {
+      gameMap.set(g.id, { id: g.id, name: g.name || "Unnamed Game" });
+    }
+  });
 
-  return Array.from(allGameIds).map((id) => ({ id }));
+  (memberGames || []).forEach((m) => {
+    const game = (m as any).games;
+    if (game && game.id) {
+      gameMap.set(game.id, { id: game.id, name: game.name || "Unnamed Game" });
+    }
+  });
+
+  return Array.from(gameMap.values());
 }
 
 /**
@@ -93,7 +103,7 @@ export async function getUserGames(userId: string) {
 export async function getUserMechs(userId: string) {
   const { data, error } = await supabase
     .from("mechs")
-    .select("id")
+    .select("id, chassis_name, pattern_name")
     .eq("user_id", userId);
 
   if (error) {
@@ -109,7 +119,7 @@ export async function getUserMechs(userId: string) {
 export async function getUserPilots(userId: string) {
   const { data, error } = await supabase
     .from("pilots")
-    .select("id")
+    .select("id, callsign")
     .eq("user_id", userId);
 
   if (error) {
@@ -125,7 +135,7 @@ export async function getUserPilots(userId: string) {
 export async function getUserCrawlers(userId: string) {
   const { data, error } = await supabase
     .from("crawlers")
-    .select("id")
+    .select("id, name")
     .eq("user_id", userId);
 
   if (error) {

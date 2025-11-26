@@ -5,14 +5,24 @@ import { getUserByDiscordId, getUserGames } from "../lib/supabase-helpers";
 import { embedFooterDetails } from "../core/constants";
 
 export const config: CommandConfig = {
-  description: "View your game IDs from salvageunion.io",
+  description: "View your games from salvageunion.io",
 };
 
 export default async (
   interaction: ChatInputCommandInteraction,
   _options: CommandOptions<typeof config>
 ): Promise<CommandResult> => {
-  await interaction.deferReply();
+  // Defer immediately to prevent interaction timeout
+  try {
+    await interaction.deferReply();
+  } catch (error: any) {
+    // If interaction already expired or was replied to, log and return
+    if (error.code === 10062 || error.code === 40060) {
+      console.error("Interaction expired before defer:", error);
+      return;
+    }
+    throw error;
+  }
 
   try {
     const discordUserId = interaction.user.id;
@@ -36,18 +46,28 @@ export default async (
       return;
     }
 
-    const gameIds = games.map((g) => `\`${g.id}\``).join(", ");
+    // Create individual embeds for each game (Discord limit: 10 embeds per message)
+    const embeds = games.slice(0, 10).map((game) => {
+      const title = game.name || "Unnamed Game";
+      const url = `https://salvageunion.io/dashboard/games/${game.id}`;
+      
+      return new EmbedBuilder()
+        .setTitle(title)
+        .setURL(url)
+        .setColor(Colors.Blue)
+        .setFooter(embedFooterDetails)
+        .setTimestamp();
+    });
 
-    const embed = new EmbedBuilder()
-      .setTitle("🎮 Your Games")
-      .setDescription(
-        gameIds.length > 4096 ? gameIds.substring(0, 4093) + "..." : gameIds
-      )
-      .setColor(Colors.Blue)
-      .setFooter(embedFooterDetails)
-      .setTimestamp();
+    // If there are more than 10 games, add a note
+    if (games.length > 10) {
+      const lastEmbed = embeds[embeds.length - 1];
+      lastEmbed.setDescription(
+        `*Showing 10 of ${games.length} games. Visit your dashboard to see all.*`
+      );
+    }
 
-    await interaction.editReply({ embeds: [embed.toJSON()] });
+    await interaction.editReply({ embeds: embeds.map((e) => e.toJSON()) });
   } catch (error: any) {
     console.error("Error fetching games:", error);
     await interaction.editReply({
