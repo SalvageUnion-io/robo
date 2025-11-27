@@ -32,7 +32,7 @@ export default async (
     if (!user) {
       await interaction.editReply({
         content:
-          "❌ No account found. Please link your Discord account at salvageunion.io first.",
+          "❌ No account found. Please visit salvageunion.io to sign up.",
       });
       return;
     }
@@ -51,12 +51,23 @@ export default async (
       const title = crawler.name || "Unnamed Crawler";
       const url = `https://salvageunion.io/dashboard/crawlers/${crawler.id}`;
       
-      return new EmbedBuilder()
+      const embed = new EmbedBuilder()
         .setTitle(title)
         .setURL(url)
         .setColor(Colors.Orange)
         .setFooter(embedFooterDetails)
         .setTimestamp();
+
+      // Add tech level field if available
+      if (crawler.tech_level !== null && crawler.tech_level !== undefined) {
+        embed.addFields({
+          name: "TL",
+          value: String(crawler.tech_level),
+          inline: true,
+        });
+      }
+
+      return embed;
     });
 
     // If there are more than 10 crawlers, add a note

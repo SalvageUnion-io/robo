@@ -32,7 +32,7 @@ export default async (
     if (!user) {
       await interaction.editReply({
         content:
-          "❌ No account found. Please link your Discord account at salvageunion.io first.",
+          "❌ No account found. Please visit salvageunion.io to sign up.",
       });
       return;
     }
@@ -47,16 +47,26 @@ export default async (
     }
 
     // Create individual embeds for each game (Discord limit: 10 embeds per message)
-    const embeds = games.slice(0, 10).map((game) => {
+    const embeds = games.slice(0, 10).map((game: any) => {
       const title = game.name || "Unnamed Game";
       const url = `https://salvageunion.io/dashboard/games/${game.id}`;
       
-      return new EmbedBuilder()
+      const embed = new EmbedBuilder()
         .setTitle(title)
         .setURL(url)
         .setColor(Colors.Blue)
         .setFooter(embedFooterDetails)
         .setTimestamp();
+
+      // Add member count field
+      const memberCount = game.member_count ?? 0;
+      embed.addFields({
+        name: "Members",
+        value: String(memberCount),
+        inline: true,
+      });
+
+      return embed;
     });
 
     // If there are more than 10 games, add a note
